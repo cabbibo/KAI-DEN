@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>KAI x ROLFES X CABBIBO</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        font-family: Monospace;
+        background-color: #000;
+        color: #fff;
+        margin: 0px;
+        overflow: hidden;
+      }
+      #info {
+        color: #fff;
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+        z-index: 100;
+        display:block;
+      }
+      #info a, .button { color: #f00; font-weight: bold; text-decoration: underline; cursor: pointer }
+
+      #loading{
+        width:100%;
+        height:100%;
+        position:fixed;
+        background: #000;
+        z-index: 100;
+
+      }
+
+      #startButton{
+        left:50%;
+        top:50%;
+        //width: 200px;
+        //height: 50px
+        //margin-left: -400px; /* margin is -0.5 * dimension */
+        //margin-top: -25px; 
+        background: #000;
+        z-index: 998;
+        padding: 10px;
+        transform: translate(-50%, -50%);
+        position:absolute;
+        display: none;
+       // text-align: center;
+      }
+
+      #loadBar{
+        top:50%;
+        left:0px;
+        height:2px;
+        background: #fff;
+        position: fixed;
+      }
+
+      #title{
+        background: #000;
+        z-index: 998;
+        padding: 10px;
+        transform: translate(-50%, -50%);
+        position:absolute;
+        //display: none;
+        text-align: center;
+        left:50%;
+        top:30%;
+      }
+
+      #credits{
+        font-size:20px;
+        background: #000;
+        z-index: 998;
+        padding: 10px;
+        transform: translate(-50%, -50%);
+        position:absolute;
+        //display: none;
+        left:50%;
+        top:60%;
+      }
+
+
+      #playBar{ background: rgba( 0,0,0,.3);
+        z-index: 999;
+        height: 30px;
+        //transform: translate(-50%, -50%);
+        position:absolute;
+        left:0%;
+        bottom:0%;
+        width:100%;
+        padding:-1px;
+        margin:-1px;
+        border:1px solid rgba( 255,255,255,.3);
+        display:none;
+      }
+      #playPercentage{ background: rgba( 255,255,255,.6);;
+        z-index: 999;
+        height: 30px;
+        //transform: translate(-50%, -50%);
+        position:absolute;
+        left:0%;
+        bottom:0%;
+        width:0%;
+       // padding:-1px;
+        margin:-1px;
+       // border:1px solid white;
+      }
+
+      #logo img{
+        width:100%;
+      }
+
+      #logo{
+        width:70px;
+        height:70px;
+        position: absolute;
+        left: 50%;
+        margin-left: -35px;
+        bottom:10%;
+      }
+
+      a{
+        color:#fff;
+      }
+
+      a:hover{
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+
+  <div id ="loading">
+    <h1 id ="title"> "ERROLL"<br/>Kai Whinston</h1>
+    <div id="startButton" onclick='pressButtonClicked()'> PRESS TO BEGIN </div>
+    <div id="loadBar"></div>
+    <div id ="credits"> 
+
+      <a href="http://cabbi.bo/" target="_blank">cabbibo</a> x <a href="http://samrolfes.tumblr.com/" target="_blank">rolfes</a> 
+      
+      
+    </div>
+    <!--<div id="logo"><img src="cabbibo.png"/></div>-->
+  </div>
+
+  <div id="playBar">
+    <div id="playPercentage"></div>
+  
+  </div>
+   <!-- <video id="video" autoplay loop webkit-playsinline style="display:none">
+      <source src="fluid.mp4" type='video/mp4'>
+    </video>-->
+
+
+
+    <!--<script type="text/javascript"></script>-->
+
+    <script src="scripts/underscore-min.js"></script>
+    <script src="scripts/three.js"></script>
+
+    <script src="scripts/xhr.js"></script>
+    <script src="scripts/sound.js"></script>
+
+    <script src="scripts/has.js"></script>
+    <script src="scripts/Video.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/Stream.js"></script>
+
+    <script src="js/controls/OrbitControls.js"></script>
+
+    <script src="js/loaders/collada/Animation.js"></script>
+    <script src="js/loaders/collada/AnimationHandler.js"></script>
+    <script src="js/loaders/collada/KeyFrameAnimation.js"></script>
+    <script src="js/loaders/ColladaLoader.js"></script>
+    <script src="js/loaders/FBXLoader.js"></script>
+
+
+    <script src="js/loaders/OBJLoader.js"></script>
+    <script src="js/Detector.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+
+    <script src="scripts/ShaderLoader.js"></script>
+    <script src="scripts/SmoothMouseMoveControls.js"></script>
+    <script src="scripts/smoothLookOrientation.js"></script>
+    <script src="scripts/AudioController.js"></script>
+    <script src="scripts/lookAtHeadControls.js"></script>
+   
+
+
+    <script src="scripts/Choreographer.js"></script>
+    <script src="scripts/CHORO2.js"></script>
+    <script src="scripts/CHORO.js"></script>
+
+    <script src="scripts/Trail.js"></script>
+    <script src="scripts/Background.js"></script>
+
+
+
+
+
+    <script>
+
+     // console.log("c9999");
+      var MUTE =1;
+      var FULLSCREEN = 1;
+      if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+      
+
+      var container, stats, controls;
+      var camera, scene, renderer, light;
+      var clock = new THREE.Clock();
+      var clock2 = new THREE.Clock();
+      var mixers = [];
+
+
+      var choreographer = new Choreographer( CHORO2 );
+
+
+      var clearColor = new THREE.Color( 0xff0000 );
+
+      var raycaster = new THREE.Raycaster();
+      var mouse = new THREE.Vector2(0,0);
+
+      var startButton = document.getElementById( "startButton");
+      startButton.addEventListener( 'click', function ( event ) {
+
+      if (renderer.domElement.requestFullscreen) {
+          console.log( "ya");
+          renderer.domElement.requestFullscreen();
+        }else{
+          console.log( "no");
+        }
+
+        
+
+
+
+         startItAll();
+         //playBar.sytyle
+
+          setTimeout(function(){
+              window.screen.orientation.lock("landscape");
+          }    , 1000);
+
+     }, false );
+
+      /*(var playBar = document.getElementById( "playBar");
+      var playPercentage = document.getElementById( "playPercentage");
+      playBar.addEventListener( 'click', function ( e ) {
+
+       // console.log( event );
+       //console.log( "clicked");
+       //console.log( e );
+
+        var val = ( e.clientX / window.innerWidth );
+        //console.log( val );
+
+        print( sound.buffer );
+        sound.currentTime = val * sound.buffer.duration;
+        
+
+     }, false );*/
+
+
+     /* playBar.addEventListener( 'touchstart', function ( e ) {
+        
+        console.log( "touched");
+        console.log( e );
+
+        var val = ( e.clientX / window.innerWidth );
+        console.log( val );
+
+        video.audio.currentTime = val * video.audio.buffer.duration;
+
+     }, false );*/
+
+
+
+
+
+
+
+
+      var loaded = 0;
+      var neededToLoad = 0;
+
+      var started = false;
+
+
+      var shaders = new ShaderLoader( 'shaders' );
+
+      neededToLoad ++;
+      shaders.shaderSetLoaded = function(){
+        onLoaded();
+      }
+
+      shaders.load( 'vs-horse' , 'horse' , 'vertex' );
+      shaders.load( 'fs-horse' , 'horse' , 'fragment' );
+
+      shaders.load( 'vs-blobs' , 'blobs' , 'vertex' );
+      shaders.load( 'fs-blobs' , 'blobs' , 'fragment' );
+
+      shaders.load( 'vs-guys' , 'guys' , 'vertex' );
+      shaders.load( 'fs-guys' , 'guys' , 'fragment' );
+
+      //shaders.load( 'vs-norm' , 'norm' , 'vertex' );
+      //shaders.load( 'fs-norm' , 'norm' , 'fragment' );
+      
+
+
+      var manager = new THREE.LoadingManager();
+      manager.onProgress = function ( item, loaded, total ) {
+        console.log( item, loaded, total );
+      };
+
+     // console.log( Sound.ctx );
+
+   
+
+     // source.play();
+
+
+
+     var url = 'http://api.soundcloud.com/tracks/334186373/stream' +
+        '?client_id=2400df97862fa2c06f486af524e4f974'
+
+      var audio  = new AudioController( Sound.ctx );
+      audio.mute.gain.value = 1;
+
+      var sound = new Stream( url , Sound.ctx , audio.gain );
+      sound.src = url;
+
+      
+     
+     // var video = new Video("laz.mp3", audio);
+
+      //neededToLoad ++;
+      
+      /*video.appendChild( source );
+      video.ready(function(){
+        onLoaded();
+      })*/
+
+       var G ={
+        v1: new THREE.Vector3(),
+        v2: new THREE.Vector3(),
+        explodeTime: 1,
+        animations:{},
+        models:{},
+        textures:{},
+        uniforms:{
+          time:{type:"f",value:0},
+          life:{type:"f",value:0},
+          suck:{type:"v3",value:new THREE.Vector3(0,0,.5)},
+          audio:{type:"t",value:audio.texture},
+          suckVal:{type:"f", value:0},
+          clickLocation:{type:"v3",value:new THREE.Vector3()},
+
+          v_explode: {type:"f",value:0},
+          v_clickVal:{type:"f",value:0},
+          v_lastClickTime: {type:"f",value:0},
+          v_closeLine:{type:"f",value:0},
+          v_farLine:{type:"f",value:0},
+          
+
+          v_bg:{type:"f",value:0},
+          v_on:{type:"f",value:0},
+          v_suckDisform:{type:"f",value:0},
+          v_audioDisform:{type:"f",value:0},
+          v_texture:{type:"f",value:0},
+          v_project:{type:"f",value:0},
+          v_refract:{type:"f",value:0},
+          v_rainbow:{type:"f",value:0},
+          v_audioMix:{ type:"f",value:0},
+          v_endNoise:{type:"f",value:0},
+          v_rimAudio:{type:"f",value:0},
+          v_aoAudio:{type:"f",value:0},
+          v_reflRainbow:{type:"f",value:0},
+          v_credits:{type:"f",value:0},
+
+          c_x:{type:"f",value:0},
+          c_y:{type:"f",value:0},
+          c_z:{type:"f",value:4},
+
+          t_x:{type:"f",value:0},
+          t_y:{type:"f",value:0},
+          t_z:{type:"f",value:0},
+
+          v_fullProject:{type:"f",value:0},
+          //v_fullProject:{type:"f",value:1},
+
+        }
+      }
+
+      var objLoader = new THREE.OBJLoader( manager );
+      var texLoader = new THREE.ImageLoader( manager );
+      
+
+   
+      
+      loadObject('models/kai_fissureprice_horse.OBJ' , "horse" );
+      loadObject('models/kai_fissureprice_guys.OBJ' , "guys" );
+      loadObject('models/kai_fissureprice_smallspray.OBJ' , "spray" );
+      loadTexture('models/kai_fissureprice_horse.png' , "t_horse");
+      loadTexture('cabbibo.png', "cabbibo" );
+
+
+
+      function loadTexture( url , variable ){
+
+        neededToLoad ++;
+        texLoader.load( url , function ( image ) {
+          
+          G.textures[variable] = new THREE.Texture();
+          G.textures[variable].image = image;
+          G.textures[variable].needsUpdate = true;
+          onLoaded();
+          
+        }, onProgress, onError );
+
+      }
+
+      function loadObject( url , variable ){
+        neededToLoad ++;
+        objLoader.load( url , function ( object ) {
+          object.traverse( function ( child ) {
+            if ( child instanceof THREE.Mesh ) {
+              G.models[variable] = child;
+            }
+          });
+          onLoaded();
+        }, onProgress, onError );
+      }
+
+
+
+      var controls;
+
+     
+      
+      function init() {
+
+        container = document.createElement( 'div' );
+        document.body.appendChild( container );
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .04, 100 );
+        scene = new THREE.Scene();
+        // grid03030
+        var gridHelper = new THREE.GridHelper( 1, 28, 0xff0000, 0xff0000 );
+        gridHelper.position.set( 0, -1, 0 );
+        //scene.add( gridHelper );
+        // stats
+        stats = new Stats();
+        container.appendChild( stats.dom );
+        // model
+
+
+
+
+
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.setClearColor( clearColor );
+        container.appendChild( renderer.domElement );
+
+
+        
+
+
+        if( has.mobile ){
+          console.log("has mobile");
+          controls = new LookAtHeadControls( camera );
+        }else{
+          controls = new THREE.MouseMoveControls( camera, renderer.domElement );
+          //controls = new THREE.OrbitControls( camera , renderer.domElement )
+          //controls.target.set( 0, 0, 0 );
+          controls.speed = .00003;
+          camera.position.set( 0, 0, 10 );
+          console.log( "no mobile");
+
+        }
+
+
+
+
+ 
+
+        instantiateModel("HORSE", .8,-1.5,-.8,1, G.models.horse , "horse" , G.textures.t_horse,G.textures.t_horse,G.textures.t_horse , 0);
+
+        instantiateModel("GUYS", 1,0,0,0, G.models.guys , "guys" , G.textures.t_horse,G.textures.t_horse,G.textures.t_horse , 0);
+
+        instantiateModel("SPRAY", 2,-2,-4,2, G.models.spray , "blobs" , G.textures.t_horse,G.textures.t_horse,G.textures.t_horse , 0);
+
+    
+
+
+
+       
+        //scene.add( v);
+
+        controls.update();
+        window.addEventListener( 'resize', onWindowResize, false );
+
+        sucker = new THREE.Mesh( new THREE.IcosahedronGeometry( .02 , 1 ), new THREE.MeshNormalMaterial() );
+        scene.add( sucker );
+
+        raycastPlane = new THREE.Mesh( new THREE.PlaneGeometry(100000,100000) , new THREE.MeshNormalMaterial({
+          transparent: true,
+          opacity:.0001
+        }));
+        raycastPlane.position.z = 1.4;
+        raycastPlane.rotation.x = 0;
+        scene.add( raycastPlane );
+
+        //var mat = getNewMaterial("global",G.textures.t_dawnBackplane ,G.textures.a_dawnBackplane,G.textures.n_dawnBackplane, 0);
+
+        var meshes = [G.HORSE, G.GUYS , G.SPRAY ];
+        //var meshes = [G.LEAVES1,G.LEAVES2,G.LEAVES3 ];
+       // G.trail = new Trail( 20 , sucker , G.models.leaf.geometry ,mat, meshes);
+        //G.models.leaf.geometry.computeFaceNormals();
+        
+        G.background = new Background( 400 , new THREE.BoxGeometry( 1, 1,1,) , mat );
+
+        var g = new THREE.PlaneGeometry( .5 , .5 );
+        var m = new THREE.MeshBasicMaterial({
+          blending: THREE.AdditiveBlending,
+          opacity:.1,
+          transparent:true,
+          color:0xaaaaaa,
+          map:G.textures.cabbibo
+        });
+
+
+
+        var mesh = new THREE.Mesh( g , m );
+
+        scene.add( mesh );
+        mesh.position.z = -.6;
+        mesh.position.x = 2.6;
+        mesh.position.y = -1.2;
+
+
+
+        //video.play();
+        renderer.domElement.addEventListener( 'mousemove', mousemove, false );
+        renderer.domElement.addEventListener( 'mousedown', mouseDown, false );
+        renderer.domElement.addEventListener("touchstart", touchstart, false);
+        renderer.domElement.addEventListener("touchend", touchmove, false);
+        renderer.domElement.addEventListener("touchmove", touchmove, false);
+
+
+      }
+
+
+      function getNewMaterial(shader, t, ao,n,bg){
+
+        return new THREE.ShaderMaterial({
+
+          uniforms:{
+            
+            //t_video:{ type:"t" , value: videoTexture },
+            t_normal:{ type:"t" , value: n },
+            t_texture:{ type:"t" , value: t  },
+            t_ao:{ type:"t" , value: ao },
+            life: G.uniforms.life,
+            time: G.uniforms.time,
+            suck: G.uniforms.suck,
+            audio: G.uniforms.audio,
+
+            isBG :{type:"f",value:bg},
+
+            clickLocation : G.uniforms.clickLocation,
+            v_explode: G.uniforms.v_explode,
+            v_clickVal:G.uniforms.v_clickVal,
+            v_lastClickTime: G.uniforms.v_lastClickTime,
+            
+            v_bg:G.uniforms.v_bg,
+            v_on:G.uniforms.v_on,
+            v_suckDisform:G.uniforms.v_suckDisform,
+            v_audioDisform:G.uniforms.v_audioDisform,
+            v_project:G.uniforms.v_project,
+            v_texture:G.uniforms.v_texture,
+
+            v_refract:G.uniforms.v_refract,
+            v_rainbow:G.uniforms.v_rainbow,
+            v_rimAudio:G.uniforms.v_rimAudio,
+            v_aoAudio:G.uniforms.v_aoAudio,
+            v_audioMix:G.uniforms.v_audioMix,
+            v_endNoise:G.uniforms.v_endNoise,
+            v_reflRainbow:G.uniforms.v_reflRainbow,
+            v_fullProject:G.uniforms.v_fullProject
+
+          },
+          vertexShader:   shaders.vertexShaders[shader],
+          fragmentShader: shaders.fragmentShaders[shader],
+         // shading: THREE.SmoothShading
+          side: THREE.DoubleSide
+
+        });
+
+      }
+      function instantiateModel( name , scale ,x, y, z , model, shader, t , ao , n, bg ){
+
+
+       
+
+        //mat = new THREE.MeshNormalMaterial({side:THREE.DoubleSide});
+        mat = getNewMaterial(shader, t, ao,n,bg);
+        model.material = mat;
+        model.scale.multiplyScalar(scale);
+        model.position.x = x;
+        model.position.y = y;
+        model.position.z = z;
+
+        //model.scale.multiplyScalar( 3.3);
+        //model.position.y = -3;
+        scene.add( model );
+
+        model.updateMatrix();
+        G[ name ]= model;
+
+      }
+
+
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+      }
+      
+
+
+     
+      //
+      function animate() {
+
+
+        requestAnimationFrame( animate );
+        
+
+        var d = clock.getDelta();
+       // console.log( d );
+        
+        updateCam();
+        controls.update();
+
+
+        audio.update();
+
+        raycaster.setFromCamera( mouse , camera );
+        var intersect = raycaster.intersectObject( raycastPlane );
+       // console.log( intersect[0].point);
+
+       if( intersect[0]){
+        if( intersect[0].point ){
+          G.uniforms.suck.value.copy( intersect[0].point );
+        }
+      }
+
+        sucker.position.copy( G.uniforms.suck.value );
+
+
+        G.v1.copy(controls.center)
+        G.v1.sub( camera.position );
+        G.v2.set(0,0,-camera.position.z);
+        G.v1.sub( G.v2 );
+        G.uniforms.life.value = G.v1.length();
+        G.uniforms.life.value = clamp( G.uniforms.life.value*G.uniforms.life.value , 0, 1);
+
+        G.uniforms.time.value += d;
+
+        G.uniforms.v_explode.value = clamp( 1-(G.uniforms.time.value - G.uniforms.v_lastClickTime.value)/G.explodeTime,  0,1);
+       
+
+       // console.log( G.uniforms.v_on.value);
+
+        clearColor.setRGB(G.uniforms.v_bg.value,G.uniforms.v_bg.value,G.uniforms.v_bg.value );
+       
+
+        //clearColor.setRGB(0,0,0 );
+        renderer.setClearColor( clearColor );
+
+       // console.log( video );
+
+       G.HORSE.rotation.x = 0;
+       G.HORSE.rotation.y = 2;
+       //G.HORSE.scale.multiplyScalar( 2 );
+       G.HORSE.position.z = 2;
+
+       G.GUYS.position.y = -.5;
+       G.GUYS.position.x = -1.5;
+       G.GUYS.rotation.x = -.5;
+       G.GUYS.rotation.y = 1.3;
+       G.GUYS.rotation.z = -.5;
+
+       G.SPRAY.rotation.x = 0;
+       G.SPRAY.rotation.y = 2;
+
+        
+
+        //choreographer.update( sound.currentTime );
+        //updatePlayPercentage( sound.currentTime / sound.buffer.duration );
+
+
+        stats.update();
+        render();
+
+        
+
+      }
+      
+
+
+      function render() {
+        renderer.render( scene, camera );
+      }
+
+      function updateCam(){
+
+        controls.x = G.uniforms.c_x.value;
+        controls.y = G.uniforms.c_y.value;
+        controls.z = G.uniforms.c_z.value;
+
+
+        controls.center.set( G.uniforms.t_x.value , G.uniforms.t_y.value, G.uniforms.t_z.value );
+        //controls.basePos.set( G.uniforms.c_x.value , G.uniforms.c_y.value, G.uniforms.c_z.value );
+      }
+
+
+      var onProgress = function( xhr ) {
+          if ( xhr.lengthComputable ) {
+            var percentComplete = xhr.loaded / xhr.total * 100;
+            //console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+
+            if( percentComplete >= 100 ){
+              //console.log("YAY");
+              init();
+            }
+          }
+        };
+        var onError = function( xhr ) { console.log
+        };
+
+
+      
+      function onLoaded(){
+        loaded ++;
+        //console.log( loaded);
+        updateLoadBar();
+        if( neededToLoad == loaded ){
+          init();
+          addStartButton();
+        }
+      }
+
+      function startItAll(){
+
+        
+        removeStartButton();
+
+        
+        if( FULLSCREEN == 1 ){
+          fullscreenIt();
+        }
+
+
+        //document.getElementById("playBar").style.display = "block";
+       // console.log("hyeall")
+        animate();
+
+
+        setTimeout(function(){
+          //video.play();
+          
+         // updateVideo();
+        },100);
+
+        sound.play();
+        //playAtTime( 0 );
+
+        //video.play();
+        
+        if( has.mobile ){
+          controls.ResetLookDir();
+        }
+        started = true;
+        
+
+        //var elem = document.getElementById("myvideo");
+        
+
+      }
+
+      function addStartButton(){
+        //print("yaya");
+        document.getElementById("startButton").style.display = "block";
+      }
+
+      function removeStartButton(){
+        document.getElementById("loading").style.display = "none";
+      }
+
+      function updateLoadBar(){
+
+        var val = Math.floor( loaded * 100 / neededToLoad ) 
+        document.getElementById("loadBar").style.width = val + "%"
+
+      }
+
+      function updatePlayPercentage(val){
+
+       // var val = Math.floor( loaded * 100 / neededToLoad ) 
+        playPercentage.style.width = (val * 100) + "%"
+
+      }
+
+      function pressButtonClicked(){
+        //startItAll();
+      }
+
+      function clamp( num,min, max) {
+        return Math.min(Math.max(num, min), max);
+      };
+
+
+      function mouseDown( e ){
+        G.uniforms.v_lastClickTime.value = G.uniforms.time.value;
+        G.uniforms.v_clickVal.value += 1;
+        G.uniforms.clickLocation.value.copy( sucker.position );
+
+      }
+      function mousemove( e ){
+        if( started == true ) e.preventDefault();
+        mouse.x =   ( e.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;   
+
+      }
+
+      function touchmove( e ){
+        if( started == true ) e.preventDefault();
+        if( e.changedTouches[0] ){
+          mouse.x =   ( e.changedTouches[0].clientX / window.innerWidth ) * 2 - 1;
+          mouse.y = - ( e.changedTouches[0].clientY / window.innerHeight ) * 2 + 1; 
+        }
+
+      }
+
+      function touchstart( e ){
+        if( started == true ){
+          if( e.changedTouches[0] ){
+            mouse.x =   ( e.changedTouches[0].clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( e.changedTouches[0].clientY / window.innerHeight ) * 2 + 1; 
+          }
+        }
+
+      }
+
+
+
+
+      function fullscreenIt(){
+
+        var element = document.body;
+
+       /* if(element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if(element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        } else if(element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        } else if(element.msRequestFullscreen) {
+          element.msRequestFullscreen();
+        }*/
+
+
+       /* screen.lockOrientationUniversal = window.screen.lockOrientation || window.screen.mozLockOrientation || window.screen.msLockOrientation;
+
+        console.log( screen );*/
+
+         
+
+       /* if (screen.lockOrientationUniversal("landscape-primary")) {
+          // orientation was locked
+        } else {
+          // orientation lock failed
+        }*/
+      }
+
+      function playAtTime(t){
+
+       // sound.pause();
+        //sound.play({time:t});
+
+      }
+
+     
+    </script>
+
+  </body>
+</html>

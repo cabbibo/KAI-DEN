@@ -1,0 +1,8 @@
+function Background(){
+  
+
+}
+
+Background.prototype.update = function(){
+  
+}
